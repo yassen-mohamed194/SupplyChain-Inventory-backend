@@ -71,6 +71,4 @@ const login = async (req, res) => {
   }
 };
 
-console.log('Auth.controller.js: login type =', typeof login);
-
 module.exports = { login, getMe };

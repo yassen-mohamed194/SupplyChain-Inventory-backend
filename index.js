@@ -3,6 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 dotenv.config();
 
@@ -13,24 +15,30 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Minimal request logging for debugging route issues
-app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl}`);
-  next();
-});
-
 // Health Check
 app.get('/', (req, res) => {
   res.json({ message: 'Supplychain backend is running' });
 });
 
+// API Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customSiteTitle: 'SupplyChain Inventory API Docs',
+}));
+
+
+
+
+app.get('/api/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // Helper function to safely load and validate routes
 const loadRoutes = (path, routeName) => {
   try {
-    console.log(`index.js: loading ${routeName} from`, path);
     const routes = require(path);
-    console.log(`index.js: ${routeName} type =`, typeof routes);
-    
+
     if (typeof routes !== 'function') {
       throw new Error(`${routeName} must be an Express router function. Got ${typeof routes} instead.`);
     }
@@ -82,13 +90,13 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 8002;
 const MONGO_URI = process.env.MONGO_URI;
 
+
+
+
+
 async function startServer() {
     try {
         if (MONGO_URI) {
-            mongoose.connection.once('open', () => {
-                console.log('[DB] MongoDB connection open');
-            });
-
             mongoose.connection.on('error', (error) => {
                 console.error('[DB] MongoDB connection error:', error.message || error);
             });
@@ -107,5 +115,6 @@ async function startServer() {
         process.exit(1);
     }
 }
+
 
 startServer();
