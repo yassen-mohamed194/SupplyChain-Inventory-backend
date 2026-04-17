@@ -1,21 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAllUsers, 
-  getUserById, 
-  updateUser, 
-  deleteUser, 
-  createUser 
+const verifyToken = require('../../Middleware/VerfiyToken');
+const authorizeRoles = require('../../Middleware/authorizeRoles');
+
+const {
+  createUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
 } = require('./users.controller');
 
-console.log('users.routes.js: router type =', typeof router);
+// ADMIN-only user management
+router.use(verifyToken, authorizeRoles('ADMIN'));
 
-// Define routes
+router.post('/', createUser);
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
-router.post('/', createUser);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
 
-// Export the router directly (not as an object)
 module.exports = router;

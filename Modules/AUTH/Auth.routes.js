@@ -13,6 +13,6 @@ if (typeof login !== 'function') {
 }
 
 router.post('/login', login);
-router.get('/me', verifyToken, getMe);
+router.get('/me', verifyToken, getMe); // GET /api/auth/me
 
 module.exports = router;

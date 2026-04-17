@@ -56,20 +56,37 @@ app.use('/api/inventory', inventoryRoutes);
 const ordersRoutes = loadRoutes('./Modules/Order/order.route', 'ordersRoutes');
 app.use('/api/orders', ordersRoutes);
 
+// JSON 404 for unknown routes (avoid Express default HTML)
+app.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+// Centralized error handler
+app.use((err, req, res, next) => {
+  console.error('[ERROR] Unhandled', {
+    method: req.method,
+    url: req.originalUrl,
+    message: err && err.message,
+  });
+
+  const status = err && Number.isInteger(err.status) ? err.status : 500;
+  const message =
+    status === 500 ? 'Internal server error' : err.message || 'Error';
+
+  return res.status(status).json({ success: false, message });
+});
+
 const PORT = process.env.PORT || 8002;
 const MONGO_URI = process.env.MONGO_URI;
-const seedAdmin = require('./Modules/AUTH/utils/seedAdmin');
 
 async function startServer() {
     try {
         if (MONGO_URI) {
             mongoose.connection.once('open', () => {
                 console.log('[DB] MongoDB connection open');
-                seedAdmin().then(() => {
-                    console.log('[SEED] Admin seed completed');
-                }).catch((error) => {
-                    console.error('[SEED] Admin seed failed:', error.message || error);
-                });
             });
 
             mongoose.connection.on('error', (error) => {
