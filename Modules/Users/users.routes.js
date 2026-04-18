@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../../Middleware/VerfiyToken');
 const authorizeRoles = require('../../Middleware/authorizeRoles');
+const validate = require('../../middleware/validate');
+const {
+  createUserSchema,
+  updateUserSchema,
+  userIdSchema,
+  blockPasswordUpdate,
+} = require('../../middleware/validations/users.validation');
 
 const {
   createUser,
@@ -287,10 +294,16 @@ const {
 // ADMIN-only user management
 router.use(verifyToken, authorizeRoles('ADMIN'));
 
-router.post('/', createUser);
+router.post('/', validate(createUserSchema), createUser);
 router.get('/', getAllUsers);
-router.get('/:id', getUserById);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.get('/:id', validate(userIdSchema, 'params'), getUserById);
+router.put(
+  '/:id',
+  validate(userIdSchema, 'params'),
+  blockPasswordUpdate,
+  validate(updateUserSchema),
+  updateUser
+);
+router.delete('/:id', validate(userIdSchema, 'params'), deleteUser);
 
 module.exports = router;

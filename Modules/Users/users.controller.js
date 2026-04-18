@@ -1,25 +1,4 @@
-const mongoose = require('mongoose');
-const { z } = require('zod');
 const User = require('./users.model');
-
-const ROLES = ['ADMIN', 'ACCOUNTANT', 'WAREHOUSE', 'USER'];
-
-const createUserSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  email: z.string().trim().email('Invalid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(ROLES).optional(),
-});
-
-const updateUserSchema = z.object({
-  name: z.string().trim().min(1).optional(),
-  email: z.string().trim().email().optional(),
-  role: z.enum(ROLES).optional(),
-});
-
-function isValidObjectId(id) {
-  return mongoose.Types.ObjectId.isValid(String(id));
-}
 
 function safeUserProjection() {
   return { name: 1, email: 1, role: 1, createdAt: 1, updatedAt: 1 };
@@ -27,16 +6,7 @@ function safeUserProjection() {
 
 async function createUser(req, res) {
   try {
-    const parsed = createUserSchema.safeParse(req.body || {});
-    if (!parsed.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        data: parsed.error.flatten(),
-      });
-    }
-
-    const payload = parsed.data;
+    const payload = req.body;
     const email = payload.email.toLowerCase();
 
     const existing = await User.findOne({ email }).lean();
@@ -79,9 +49,6 @@ async function getAllUsers(req, res) {
 async function getUserById(req, res) {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id' });
-    }
 
     const user = await User.findById(id).select(safeUserProjection()).lean();
     if (!user) {
@@ -98,28 +65,7 @@ async function getUserById(req, res) {
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id' });
-    }
-
-    // Explicitly block password updates on this endpoint
-    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'password')) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password cannot be updated using this endpoint',
-      });
-    }
-
-    const parsed = updateUserSchema.safeParse(req.body || {});
-    if (!parsed.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        data: parsed.error.flatten(),
-      });
-    }
-
-    const updates = { ...parsed.data };
+    const updates = { ...req.body };
     if (updates.email) updates.email = updates.email.toLowerCase();
 
     if (updates.email) {
@@ -156,9 +102,6 @@ async function updateUser(req, res) {
 async function deleteUser(req, res) {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id' });
-    }
 
     const deleted = await User.findByIdAndDelete(id).select('_id').lean();
     if (!deleted) {
