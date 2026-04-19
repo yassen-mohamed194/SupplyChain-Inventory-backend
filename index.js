@@ -68,6 +68,9 @@ app.use('/api/inventory', inventoryRoutes);
 const ordersRoutes = loadRoutes('./Modules/Order/order.route', 'ordersRoutes');
 app.use('/api/orders', ordersRoutes);
 
+const productRoutes = loadRoutes('./Modules/Products/Product.route', 'productRoutes');
+app.use('/api/products', productRoutes);
+
 // JSON 404 for unknown routes (avoid Express default HTML)
 app.use((req, res) => {
   return res.status(404).json({

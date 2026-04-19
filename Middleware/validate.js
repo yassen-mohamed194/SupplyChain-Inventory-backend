@@ -1,4 +1,4 @@
-const validate = (schema, source = 'body') => (req, res, next) => {
+const validate = (schema, source = 'body', options = {}) => (req, res, next) => {
   const input =
     source === 'body' ? req.body || {} : source === 'params' ? req.params || {} : req[source];
 
@@ -9,7 +9,11 @@ const validate = (schema, source = 'body') => (req, res, next) => {
     // - body validation errors: { success:false, message:'Validation error', data:<flatten> }
     // - params (id) validation errors: { success:false, message:'Invalid user id' }
     if (source === 'params') {
-      return res.status(400).json({ success: false, message: 'Invalid user id' });
+      const msg =
+        typeof options.invalidParamsMessage === 'string'
+          ? options.invalidParamsMessage
+          : 'Invalid user id';
+      return res.status(400).json({ success: false, message: msg });
     }
 
     return res.status(400).json({
