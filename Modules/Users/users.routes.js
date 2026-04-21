@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../../Middleware/VerfiyToken');
 const authorizeRoles = require('../../Middleware/authorizeRoles');
-const validate = require('../../middleware/validate');
+const validate = require('../../Middleware/validate');
 const {
   createUserSchema,
   updateUserSchema,
   userIdSchema,
   blockPasswordUpdate,
-} = require('../../middleware/validations/users.validation');
+} = require('../../Middleware/validations/users.validation');
 
 const {
   createUser,
