@@ -66,7 +66,7 @@ app.use('/api/users', usersRoutes);
 const inventoryRoutes = loadRoutes('./Modules/Inventory/inventory.routes', 'inventoryRoutes');
 app.use('/api/inventory', inventoryRoutes);
 
-const ordersRoutes = loadRoutes('./Modules/Order/order.route', 'ordersRoutes');
+const ordersRoutes = loadRoutes('./Modules/Order/order.routes', 'ordersRoutes');
 app.use('/api/orders', ordersRoutes);
 
 const productRoutes = loadRoutes('./Modules/Products/Product.route', 'productRoutes');
