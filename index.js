@@ -18,6 +18,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Health Check
 app.get('/', (req, res) => {
@@ -73,6 +74,9 @@ app.use('/api/products', productRoutes);
 
 const supplierRoutes = loadRoutes('./Modules/Suppliers/supplier.route', 'supplierRoutes');
 app.use('/api/suppliers', supplierRoutes);
+
+const purchaseRoutes = loadRoutes('./Modules/Purchase/purchase.routes', 'purchaseRoutes');
+app.use('/api/purchases', purchaseRoutes);
 
 // JSON 404 for unknown routes (avoid Express default HTML)
 app.use((req, res) => {

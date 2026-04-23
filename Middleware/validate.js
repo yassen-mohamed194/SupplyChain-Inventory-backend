@@ -1,14 +1,37 @@
 const validate = (schema, source = 'body', options = {}) => (req, res, next) => {
-  const input =
-    source === 'body' ? req.body || {} : source === 'params' ? req.params || {} : req[source];
+  const isWrappedMode = source === 'all';
+  const normalizedBody =
+    req.body &&
+    typeof req.body === 'object' &&
+    !Array.isArray(req.body) &&
+    req.body.body &&
+    typeof req.body.body === 'object' &&
+    !Array.isArray(req.body.body)
+      ? req.body.body
+      : req.body;
+
+  const input = isWrappedMode
+    ? {
+        body: normalizedBody || {},
+        params: req.params || {},
+        query: req.query || {},
+      }
+    : source === 'body'
+      ? normalizedBody || {}
+      : source === 'params'
+        ? req.params || {}
+        : source === 'query'
+          ? req.query || {}
+          : req.body || {};
 
   const result = schema.safeParse(input);
 
   if (!result.success) {
-    // Keep parity with existing users controller responses:
-    // - body validation errors: { success:false, message:'Validation error', data:<flatten> }
-    // - params (id) validation errors: { success:false, message:'Invalid user id' }
-    if (source === 'params') {
+    const hasParamsError =
+      source === 'params' ||
+      result.error.issues.some((issue) => Array.isArray(issue.path) && issue.path[0] === 'params');
+
+    if (hasParamsError) {
       const msg =
         typeof options.invalidParamsMessage === 'string'
           ? options.invalidParamsMessage
@@ -23,7 +46,14 @@ const validate = (schema, source = 'body', options = {}) => (req, res, next) => 
     });
   }
 
-  req[source] = result.data;
+  if (isWrappedMode) {
+    if (result.data.body !== undefined) req.body = result.data.body;
+    if (result.data.params !== undefined) req.params = result.data.params;
+    if (result.data.query !== undefined) req.query = result.data.query;
+  } else {
+    req[source] = result.data;
+  }
+
   next();
 };
 
