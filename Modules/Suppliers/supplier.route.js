@@ -23,20 +23,20 @@ const idParamsOptions = { invalidParamsMessage: 'Invalid supplier id' };
 
 router.use(verifyToken);
 
-// READ (ADMIN + WAREHOUSE)
-router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE'), getAllSuppliers);
+// READ (ADMIN + WAREHOUSE + ACCOUNTANT)
+router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'), getAllSuppliers);
 router.get(
   '/:id',
-  authorizeRoles('ADMIN', 'WAREHOUSE'),
+  authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'),
   validate(supplierIdSchema, 'params', idParamsOptions),
   getSupplierById
 );
 
-// WRITE (ADMIN only)
-router.post('/', authorizeRoles('ADMIN'), validate(createSupplierValidation), createSupplier);
+// WRITE (ADMIN + ACCOUNTANT only can create and update)
+router.post('/', authorizeRoles('ADMIN', 'ACCOUNTANT'), validate(createSupplierValidation), createSupplier);
 router.put(
   '/:id',
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN', 'ACCOUNTANT'),
   validate(supplierIdSchema, 'params', idParamsOptions),
   validate(updateSupplierValidation),
   updateSupplier

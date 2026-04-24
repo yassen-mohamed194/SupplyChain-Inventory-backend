@@ -26,10 +26,10 @@ router.post(
   validate(createProductValidation),
   createProduct
 );
-router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE'), getAllProducts);
+router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'), getAllProducts);
 router.get(
   '/:id',
-  authorizeRoles('ADMIN', 'WAREHOUSE'),
+  authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'),
   validate(productIdSchema, 'params', idParamsOptions),
   getProductById
 );

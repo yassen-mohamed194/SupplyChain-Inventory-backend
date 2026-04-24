@@ -11,8 +11,8 @@ const {
 
 router.use(verifyToken);
 
-router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE'), getAllLogs);
-router.get('/stock/:productId', authorizeRoles('ADMIN', 'WAREHOUSE'), getProductStock);
-router.get('/:productId', authorizeRoles('ADMIN', 'WAREHOUSE'), getLogsByProduct);
+router.get('/', authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'), getAllLogs);
+router.get('/stock/:productId', authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'), getProductStock);
+router.get('/:productId', authorizeRoles('ADMIN', 'WAREHOUSE' , 'ACCOUNTANT'), getLogsByProduct);
 
 module.exports = router;
