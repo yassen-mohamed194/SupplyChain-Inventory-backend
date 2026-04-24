@@ -537,12 +537,618 @@ const options = {
           },
         },
       },
+
+      '/api/inventory': {
+        get: {
+          tags: ['Inventory'],
+          summary: 'List all inventory logs',
+          description:
+            'Retrieve all inventory movement logs sorted by latest first. (Roles: ADMIN, WAREHOUSE)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Inventory logs fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/InventoryLog' },
+                      },
+                    },
+                    required: ['success', 'data'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/inventory/{productId}': {
+        get: {
+          tags: ['Inventory'],
+          summary: 'List inventory logs by product',
+          description:
+            'Retrieve all inventory logs for a specific product sorted by latest first. (Roles: ADMIN, WAREHOUSE)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'productId',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the product',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Product inventory logs fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/InventoryLog' },
+                      },
+                    },
+                    required: ['success', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid product id',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    invalidProductId: {
+                      value: { success: false, message: 'Invalid product id' },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/inventory/stock/{productId}': {
+        get: {
+          tags: ['Inventory'],
+          summary: 'Get current stock by product',
+          description:
+            'Calculate available stock from inventory IN/OUT movements for one product. (Roles: ADMIN, WAREHOUSE)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'productId',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the product',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Product stock fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: { $ref: '#/components/schemas/ProductStockResponse' },
+                    },
+                    required: ['success', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid product id',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    invalidProductId: {
+                      value: { success: false, message: 'Invalid product id' },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+
+      '/api/orders': {
+        post: {
+          tags: ['Orders'],
+          summary: 'Create order',
+          description:
+            'Create a new customer order with status PENDING and calculated totalAmount. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/CreateOrderRequest' },
+                examples: {
+                  createOrder: {
+                    value: {
+                      customerName: 'John Doe',
+                      items: [
+                        {
+                          productId: '67f1234567890abcde123456',
+                          quantity: 2,
+                          price: 100,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: 'Order created successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Order created successfully' },
+                      data: { $ref: '#/components/schemas/Order' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Validation error',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+        get: {
+          tags: ['Orders'],
+          summary: 'List all orders',
+          description: 'Retrieve all orders sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Orders fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Orders fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Order' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/orders/{id}': {
+        get: {
+          tags: ['Orders'],
+          summary: 'Get order by id',
+          description: 'Retrieve one order by MongoDB ObjectId. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the order',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Order fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Order fetched successfully' },
+                      data: { $ref: '#/components/schemas/Order' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid order id',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    invalidOrderId: {
+                      value: { success: false, message: 'Invalid order id', data: null },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            404: {
+              description: 'Order not found',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    orderNotFound: {
+                      value: { success: false, message: 'Order not found', data: null },
+                    },
+                  },
+                },
+              },
+            },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/orders/{id}/confirm': {
+        put: {
+          tags: ['Orders'],
+          summary: 'Confirm order and decrement stock',
+          description:
+            'Confirms a PENDING order after stock check and creates OUT inventory logs for each item. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the order',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Order confirmed successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Order confirmed successfully' },
+                      data: { $ref: '#/components/schemas/Order' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description:
+                'Invalid order id, invalid product id, already confirmed, or insufficient stock',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    orderAlreadyConfirmed: {
+                      value: {
+                        success: false,
+                        message: 'Order already confirmed',
+                        data: null,
+                      },
+                    },
+                    insufficientStock: {
+                      value: {
+                        success: false,
+                        message: 'Insufficient stock',
+                        data: {
+                          productId: '67f1234567890abcde123456',
+                          requested: 5,
+                          available: 2,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            404: {
+              description: 'Order not found',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
+              },
+            },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+
+      '/api/purchases': {
+        post: {
+          tags: ['Purchases'],
+          summary: 'Create purchase',
+          description:
+            'Create a supplier purchase with status PENDING and calculated totalAmount. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/CreatePurchaseRequest' },
+                examples: {
+                  createPurchase: {
+                    value: {
+                      supplierId: '67f1234567890abcde123450',
+                      items: [
+                        {
+                          productId: '67f1234567890abcde123456',
+                          quantity: 10,
+                          price: 50,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: 'Purchase created successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Purchase created successfully' },
+                      data: { $ref: '#/components/schemas/Purchase' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Validation error',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+        get: {
+          tags: ['Purchases'],
+          summary: 'List all purchases',
+          description: 'Retrieve all purchases sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Purchases fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Purchases fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Purchase' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/purchases/{id}': {
+        get: {
+          tags: ['Purchases'],
+          summary: 'Get purchase by id',
+          description: 'Retrieve one purchase by MongoDB ObjectId. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the purchase',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Purchase fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Purchase fetched successfully' },
+                      data: { $ref: '#/components/schemas/Purchase' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid purchase id',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    invalidPurchaseId: {
+                      value: { success: false, message: 'Invalid purchase id', data: null },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            404: {
+              description: 'Purchase not found',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    purchaseNotFound: {
+                      value: { success: false, message: 'Purchase not found', data: null },
+                    },
+                  },
+                },
+              },
+            },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/purchases/{id}/status': {
+        put: {
+          tags: ['Purchases'],
+          summary: 'Update purchase status',
+          description:
+            'Update purchase status to PENDING or RECEIVED. When set to RECEIVED, IN inventory logs are created for each item. (Roles: ADMIN, WAREHOUSE)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'MongoDB ObjectId of the purchase',
+              example: '67f1234567890abcde123456',
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/UpdatePurchaseStatusRequest' },
+                examples: {
+                  markReceived: { value: { status: 'RECEIVED' } },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: 'Purchase status updated successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Purchase status updated successfully' },
+                      data: { $ref: '#/components/schemas/Purchase' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid purchase id, invalid status, or purchase already received',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    alreadyReceived: {
+                      value: {
+                        success: false,
+                        message: 'Purchase already marked as RECEIVED',
+                        data: null,
+                      },
+                    },
+                    invalidStatus: {
+                      value: {
+                        success: false,
+                        message: 'Invalid status',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            404: {
+              description: 'Purchase not found',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/ApiError' } },
+              },
+            },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
     },
     tags: [
       { name: 'Auth', description: 'Authentication endpoints' },
       { name: 'Users', description: 'User management endpoints (ADMIN only)' },
       { name: 'Products', description: 'Product catalog endpoints' },
       { name: 'Suppliers', description: 'Supplier management endpoints' },
+      { name: 'Inventory', description: 'Inventory logs and stock endpoints' },
+      { name: 'Orders', description: 'Sales order endpoints' },
+      { name: 'Purchases', description: 'Purchase order endpoints' },
     ],
     components: {
       securitySchemes: {
@@ -711,6 +1317,114 @@ const options = {
           },
           additionalProperties: false,
         },
+
+        InventoryLog: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '67f1234567890abcde123456' },
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            type: { type: 'string', enum: ['IN', 'OUT'], example: 'IN' },
+            quantity: { type: 'number', minimum: 1, example: 10 },
+            source: { type: 'string', enum: ['PURCHASE', 'ORDER'], example: 'PURCHASE' },
+            referenceId: { type: 'string', example: '67f1234567890abcde123499' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['productId', 'type', 'quantity', 'source', 'referenceId'],
+        },
+        ProductStockResponse: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            stock: { type: 'number', example: 25 },
+          },
+          required: ['productId', 'stock'],
+        },
+        OrderItem: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            quantity: { type: 'number', minimum: 1, example: 2 },
+            price: { type: 'number', minimum: 0.01, example: 100 },
+          },
+          required: ['productId', 'quantity', 'price'],
+          additionalProperties: false,
+        },
+        Order: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '67f1234567890abcde123456' },
+            customerName: { type: 'string', example: 'John Doe' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OrderItem' },
+            },
+            status: { type: 'string', enum: ['PENDING', 'CONFIRMED'], example: 'PENDING' },
+            totalAmount: { type: 'number', minimum: 0, example: 200 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['_id', 'customerName', 'items', 'status', 'totalAmount'],
+        },
+        CreateOrderRequest: {
+          type: 'object',
+          properties: {
+            customerName: { type: 'string', minLength: 1, example: 'John Doe' },
+            items: {
+              type: 'array',
+              minItems: 1,
+              items: { $ref: '#/components/schemas/OrderItem' },
+            },
+          },
+          required: ['customerName', 'items'],
+          additionalProperties: false,
+        },
+        PurchaseItem: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            quantity: { type: 'number', minimum: 1, example: 10 },
+            price: { type: 'number', minimum: 0.01, example: 50 },
+          },
+          required: ['productId', 'quantity', 'price'],
+          additionalProperties: false,
+        },
+        Purchase: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '67f1234567890abcde123456' },
+            supplierId: { type: 'string', example: '67f1234567890abcde123460' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/PurchaseItem' },
+            },
+            status: { type: 'string', enum: ['PENDING', 'RECEIVED'], example: 'PENDING' },
+            totalAmount: { type: 'number', minimum: 0, example: 500 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['_id', 'supplierId', 'items', 'status', 'totalAmount'],
+        },
+        CreatePurchaseRequest: {
+          type: 'object',
+          properties: {
+            supplierId: { type: 'string', example: '67f1234567890abcde123460' },
+            items: {
+              type: 'array',
+              minItems: 1,
+              items: { $ref: '#/components/schemas/PurchaseItem' },
+            },
+          },
+          required: ['supplierId', 'items'],
+          additionalProperties: false,
+        },
+        UpdatePurchaseStatusRequest: {
+          type: 'object',
+          properties: {
+            status: { type: 'string', enum: ['PENDING', 'RECEIVED'], example: 'RECEIVED' },
+          },
+          required: ['status'],
+          additionalProperties: false,
+        },
       },
       responses: {
         Unauthorized: {
@@ -761,6 +1475,9 @@ const options = {
     './Modules/Users/*.js',
     './Modules/Products/*.js',
     './Modules/Suppliers/*.js',
+    './Modules/Inventory/*.js',
+    './Modules/Order/*.js',
+    './Modules/Purchase/*.js',
   ],
 };
 
