@@ -14,6 +14,7 @@ const {
 const {
   createPurchase,
   getAllPurchases,
+  getPurchasesBySupplier,
   getPurchaseById,
   updatePurchaseStatus,
 } = require('./Purchase.controller');
@@ -30,6 +31,12 @@ router.post(
 );
 
 router.get('/', authorizeRoles('ADMIN', 'ACCOUNTANT'), getAllPurchases);
+
+router.get(
+  '/supplier/:supplierId',
+  authorizeRoles('ADMIN', 'ACCOUNTANT'),
+  getPurchasesBySupplier
+);
 
 router.get(
   '/:id',

@@ -53,6 +53,42 @@ async function getAllPurchases(req, res) {
   }
 }
 
+async function getPurchasesBySupplier(req, res) {
+  try {
+    const { supplierId } = req.params;
+
+    if (!isValidObjectId(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid supplier id',
+        data: null,
+      });
+    }
+
+    const purchases = await Purchase.find({ supplierId }).sort({ createdAt: -1 }).lean();
+
+    const formattedPurchases = purchases.map((purchase) => ({
+      totalAmount: purchase.totalAmount,
+      totalQuantity: purchase.items.reduce((sum, item) => sum + item.quantity, 0),
+      status: purchase.status,
+      createdAt: purchase.createdAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Supplier purchases fetched successfully',
+      data: formattedPurchases,
+    });
+  } catch (error) {
+    console.error('[purchase.getPurchasesBySupplier] error', { message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      data: null,
+    });
+  }
+}
+
 async function getPurchaseById(req, res) {
   try {
     const { id } = req.params;
@@ -164,6 +200,7 @@ async function updatePurchaseStatus(req, res) {
 module.exports = {
   createPurchase,
   getAllPurchases,
+  getPurchasesBySupplier,
   getPurchaseById,
   updatePurchaseStatus,
 };
