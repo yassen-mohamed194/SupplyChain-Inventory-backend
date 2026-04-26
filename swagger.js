@@ -995,6 +995,74 @@ const options = {
           },
         },
       },
+      '/api/purchases/supplier/{supplierId}': {
+        get: {
+          tags: ['Purchases'],
+          summary: 'Get purchases by supplier id',
+          description:
+            'Retrieve purchase history for a specific supplier sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'supplierId',
+              required: true,
+              schema: { type: 'string' },
+              description: 'Supplier ID',
+              example: '67f1234567890abcde123460',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Supplier purchases fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            totalAmount: { type: 'number', example: 500 },
+                            totalQuantity: { type: 'number', example: 10 },
+                            status: {
+                              type: 'string',
+                              enum: ['PENDING', 'RECEIVED'],
+                              example: 'PENDING',
+                            },
+                            createdAt: { type: 'string', format: 'date-time' },
+                          },
+                          required: ['totalAmount', 'totalQuantity', 'status', 'createdAt'],
+                        },
+                      },
+                    },
+                    required: ['success', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid supplier id',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiError' },
+                  examples: {
+                    invalidSupplierId: {
+                      value: { success: false, message: 'Invalid supplier id', data: null },
+                    },
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
       '/api/purchases/{id}': {
         get: {
           tags: ['Purchases'],
