@@ -50,12 +50,29 @@ async function createProduct(req, res) {
 
 async function getAllProducts(req, res) {
   try {
-    const products = await Product.find()
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    const data = await Product.find()
       .select(productProjection())
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
-    return res.status(200).json({ success: true, data: products });
+    const total = await Product.countDocuments();
+
+    return res.status(200).json({
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('[products.getAllProducts] error', { message: error.message });
     return res.status(500).json({ success: false, message: 'Internal server error' });

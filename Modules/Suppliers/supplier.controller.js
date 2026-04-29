@@ -25,12 +25,29 @@ async function createSupplier(req, res) {
 
 async function getAllSuppliers(req, res) {
   try {
-    const suppliers = await Supplier.find()
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    const data = await Supplier.find()
       .select(supplierProjection())
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
-    return res.status(200).json({ success: true, data: suppliers });
+    const total = await Supplier.countDocuments();
+
+    return res.status(200).json({
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('[suppliers.getAllSuppliers] error', { message: error.message });
     return res.status(500).json({ success: false, message: 'Internal server error' });

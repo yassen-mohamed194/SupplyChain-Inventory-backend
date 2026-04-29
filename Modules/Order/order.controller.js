@@ -44,11 +44,31 @@ async function createOrder(req, res) {
 
 async function getAllOrders(req, res) {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    // Keep any future/optional filter logic intact by building on a single filters object.
+    const filters = {};
+
+    const orders = await Order.find(filters)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await Order.countDocuments(filters);
+
     return res.status(200).json({
       success: true,
       message: 'Orders fetched successfully',
       data: orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('[order.getAllOrders] error', { message: error.message });

@@ -36,12 +36,31 @@ async function createPurchase(req, res) {
 
 async function getAllPurchases(req, res) {
   try {
-    const purchases = await Purchase.find().sort({ createdAt: -1 }).lean();
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    // Keep any future/optional filter logic intact by building on a single filters object.
+    const filters = {};
+
+    const purchases = await Purchase.find(filters)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const total = await Purchase.countDocuments(filters);
 
     return res.status(200).json({
       success: true,
       message: 'Purchases fetched successfully',
       data: purchases,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('[purchase.getAllPurchases] error', { message: error.message });
