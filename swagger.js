@@ -29,6 +29,22 @@ const options = {
           description:
             'Retrieve all suppliers, sorted by creation date descending. (Roles: ADMIN, WAREHOUSE)',
           security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 1 },
+              description: 'Page number',
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 10 },
+              description: 'Number of items per page',
+            },
+          ],
           responses: {
             200: {
               description: 'List of suppliers',
@@ -42,8 +58,9 @@ const options = {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Supplier' },
                       },
+                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
                     },
-                    required: ['success', 'data'],
+                    required: ['success', 'data', 'pagination'],
                   },
                 },
               },
@@ -272,6 +289,55 @@ const options = {
           },
         },
       },
+      '/api/users': {
+        get: {
+          tags: ['Users'],
+          summary: 'List all users',
+          description:
+            'ADMIN-only endpoint to retrieve all users, sorted by creation date descending.',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 1 },
+              description: 'Page number',
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 10 },
+              description: 'Number of items per page',
+            },
+          ],
+          responses: {
+            200: {
+              description: 'List of users',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/User' },
+                      },
+                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
+                    },
+                    required: ['success', 'data', 'pagination'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
 
       '/api/products': {
         post: {
@@ -337,6 +403,22 @@ const options = {
           description:
             'Retrieve all products, sorted by creation date descending. (Roles: ADMIN, WAREHOUSE)',
           security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 1 },
+              description: 'Page number',
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 10 },
+              description: 'Number of items per page',
+            },
+          ],
           responses: {
             200: {
               description: 'List of products',
@@ -350,8 +432,9 @@ const options = {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Product' },
                       },
+                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
                     },
-                    required: ['success', 'data'],
+                    required: ['success', 'data', 'pagination'],
                   },
                 },
               },
@@ -740,6 +823,22 @@ const options = {
           summary: 'List all orders',
           description: 'Retrieve all orders sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
           security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 1 },
+              description: 'Page number',
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 10 },
+              description: 'Number of items per page',
+            },
+          ],
           responses: {
             200: {
               description: 'Orders fetched successfully',
@@ -754,8 +853,9 @@ const options = {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Order' },
                       },
+                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
                     },
-                    required: ['success', 'message', 'data'],
+                    required: ['success', 'message', 'data', 'pagination'],
                   },
                 },
               },
@@ -969,6 +1069,22 @@ const options = {
           summary: 'List all purchases',
           description: 'Retrieve all purchases sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
           security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 1 },
+              description: 'Page number',
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              required: false,
+              schema: { type: 'integer', default: 10 },
+              description: 'Number of items per page',
+            },
+          ],
           responses: {
             200: {
               description: 'Purchases fetched successfully',
@@ -983,8 +1099,9 @@ const options = {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Purchase' },
                       },
+                      pagination: { $ref: '#/components/schemas/PaginationMeta' },
                     },
-                    required: ['success', 'message', 'data'],
+                    required: ['success', 'message', 'data', 'pagination'],
                   },
                 },
               },
@@ -1208,6 +1325,234 @@ const options = {
           },
         },
       },
+      '/api/dashboard/purchases/monthly': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Get monthly purchase totals',
+          description:
+            'Returns purchase totals grouped by month for a given year (defaults to current UTC year). (Role: ADMIN)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'query',
+              name: 'year',
+              required: false,
+              schema: {
+                type: 'integer',
+                minimum: 2000,
+                maximum: 2100,
+              },
+              description: 'Target year in UTC. If omitted, current UTC year is used.',
+              example: 2026,
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Monthly purchases fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Monthly purchases fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/DashboardMonthlyTotal' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid year query parameter',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiErrorWithData' },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/dashboard/orders/monthly': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Get monthly order totals',
+          description:
+            'Returns order totals grouped by month for a given year (defaults to current UTC year). (Role: ADMIN)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'query',
+              name: 'year',
+              required: false,
+              schema: {
+                type: 'integer',
+                minimum: 2000,
+                maximum: 2100,
+              },
+              description: 'Target year in UTC. If omitted, current UTC year is used.',
+              example: 2026,
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Monthly orders fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Monthly orders fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/DashboardMonthlyTotal' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid year query parameter',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiErrorWithData' },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/dashboard/top-products': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Get top sold products',
+          description:
+            'Returns top 5 sold products based on OUT inventory movements. (Role: ADMIN)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Top products fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Top products fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/DashboardTopProduct' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/dashboard/low-stock': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Get low stock products',
+          description:
+            'Returns products with computed stock below 10 units based on IN/OUT inventory movements. (Role: ADMIN)',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Low stock products fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Low stock products fetched successfully' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/DashboardLowStockProduct' },
+                      },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
+      '/api/dashboard/finance/summary': {
+        get: {
+          tags: ['Dashboard'],
+          summary: 'Get finance summary',
+          description:
+            'Returns yearly totals (revenue, spent, net profit) and monthly financial breakdown. (Role: ADMIN)',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            {
+              in: 'query',
+              name: 'year',
+              required: false,
+              schema: {
+                type: 'integer',
+                minimum: 2000,
+                maximum: 2100,
+              },
+              description: 'Target year in UTC. If omitted, current UTC year is used.',
+              example: 2026,
+            },
+          ],
+          responses: {
+            200: {
+              description: 'Finance summary fetched successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      message: { type: 'string', example: 'Finance summary fetched successfully' },
+                      data: { $ref: '#/components/schemas/DashboardFinanceSummary' },
+                    },
+                    required: ['success', 'message', 'data'],
+                  },
+                },
+              },
+            },
+            400: {
+              description: 'Invalid year query parameter',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiErrorWithData' },
+                },
+              },
+            },
+            401: { $ref: '#/components/responses/Unauthorized' },
+            403: { $ref: '#/components/responses/Forbidden' },
+            500: { $ref: '#/components/responses/InternalServerError' },
+          },
+        },
+      },
     },
     tags: [
       { name: 'Auth', description: 'Authentication endpoints' },
@@ -1217,6 +1562,7 @@ const options = {
       { name: 'Inventory', description: 'Inventory logs and stock endpoints' },
       { name: 'Orders', description: 'Sales order endpoints' },
       { name: 'Purchases', description: 'Purchase order endpoints' },
+      { name: 'Dashboard', description: 'Dashboard analytics and summary endpoints' },
     ],
     components: {
       securitySchemes: {
@@ -1235,6 +1581,25 @@ const options = {
             message: { type: 'string', example: 'Internal server error' },
           },
           required: ['success', 'message'],
+        },
+        ApiErrorWithData: {
+          allOf: [
+            { $ref: '#/components/schemas/ApiError' },
+            {
+              type: 'object',
+              properties: {
+                data: {
+                  oneOf: [{ type: 'object' }, { type: 'array' }, { type: 'string' }, { type: 'null' }],
+                  example: {
+                    formErrors: [],
+                    fieldErrors: {
+                      year: ['Year must be greater than or equal to 2000'],
+                    },
+                  },
+                },
+              },
+            },
+          ],
         },
         AuthLoginRequest: {
           type: 'object',
@@ -1493,6 +1858,73 @@ const options = {
           required: ['status'],
           additionalProperties: false,
         },
+        DashboardMonthlyTotal: {
+          type: 'object',
+          properties: {
+            month: {
+              type: 'string',
+              enum: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              example: 'Jan',
+            },
+            total: { type: 'number', minimum: 0, example: 12000 },
+          },
+          required: ['month', 'total'],
+        },
+        DashboardTopProduct: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            productName: { type: 'string', example: 'LED Monitor 24"' },
+            totalSold: { type: 'number', minimum: 0, example: 95 },
+          },
+          required: ['productId', 'productName', 'totalSold'],
+        },
+        DashboardLowStockProduct: {
+          type: 'object',
+          properties: {
+            productId: { type: 'string', example: '67f1234567890abcde123450' },
+            productName: { type: 'string', example: 'Wireless Mouse' },
+            stock: { type: 'number', example: 4 },
+          },
+          required: ['productId', 'productName', 'stock'],
+        },
+        DashboardFinanceMonthly: {
+          type: 'object',
+          properties: {
+            month: {
+              type: 'string',
+              enum: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              example: 'Jan',
+            },
+            revenue: { type: 'number', minimum: 0, example: 18000 },
+            spent: { type: 'number', minimum: 0, example: 12000 },
+            profit: { type: 'number', example: 6000 },
+          },
+          required: ['month', 'revenue', 'spent', 'profit'],
+        },
+        DashboardFinanceSummary: {
+          type: 'object',
+          properties: {
+            totalRevenue: { type: 'number', minimum: 0, example: 150000 },
+            totalSpent: { type: 'number', minimum: 0, example: 98000 },
+            netProfit: { type: 'number', example: 52000 },
+            monthly: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/DashboardFinanceMonthly' },
+            },
+          },
+          required: ['totalRevenue', 'totalSpent', 'netProfit', 'monthly'],
+        },
+        PaginationMeta: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', example: 1 },
+            limit: { type: 'integer', example: 10 },
+            total: { type: 'integer', example: 100 },
+            pages: { type: 'integer', example: 10 },
+          },
+          required: ['page', 'limit', 'total', 'pages'],
+        },
       },
       responses: {
         Unauthorized: {
@@ -1546,6 +1978,7 @@ const options = {
     './Modules/Inventory/*.js',
     './Modules/Order/*.js',
     './Modules/Purchase/*.js',
+    './Modules/Dashboard/*.js',
   ],
 };
 
