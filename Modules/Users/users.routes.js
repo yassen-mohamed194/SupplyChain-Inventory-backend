@@ -24,7 +24,10 @@ const {
  *   post:
  *     tags: [Users]
  *     summary: Create a new user
- *     description: ADMIN-only endpoint to create a user account.
+ *     description: |
+ *       ADMIN-only endpoint to create a user account.
+ *       Allowed Roles:
+ *       - ADMIN
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -86,7 +89,10 @@ const {
  *   get:
  *     tags: [Users]
  *     summary: List all users
- *     description: ADMIN-only endpoint to retrieve all users, sorted by creation date descending.
+ *     description: |
+ *       ADMIN-only endpoint to retrieve all users, sorted by creation date descending.
+ *       Allowed Roles:
+ *       - ADMIN
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -119,7 +125,10 @@ const {
  *   get:
  *     tags: [Users]
  *     summary: Get user by id
- *     description: ADMIN-only endpoint to retrieve one user.
+ *     description: |
+ *       ADMIN-only endpoint to retrieve one user.
+ *       Allowed Roles:
+ *       - ADMIN
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -178,6 +187,8 @@ const {
  *     description: |
  *       ADMIN-only endpoint to update user details.
  *       Password updates are blocked on this endpoint.
+ *       Allowed Roles:
+ *       - ADMIN
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -246,7 +257,10 @@ const {
  *   delete:
  *     tags: [Users]
  *     summary: Delete user by id
- *     description: ADMIN-only endpoint to delete a user account.
+ *     description: |
+ *       ADMIN-only endpoint to delete a user account.
+ *       Allowed Roles:
+ *       - ADMIN
  *     security:
  *       - bearerAuth: []
  *     parameters:

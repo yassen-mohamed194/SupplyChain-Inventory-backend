@@ -26,8 +26,11 @@ const options = {
         get: {
           tags: ['Suppliers'],
           summary: 'List suppliers',
-          description:
-            'Retrieve all suppliers, sorted by creation date descending. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve all suppliers, sorted by creation date descending.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -73,7 +76,10 @@ const options = {
         post: {
           tags: ['Suppliers'],
           summary: 'Create supplier',
-          description: 'Create a supplier. (Role: ADMIN)',
+          description: `Create a supplier.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
@@ -124,8 +130,11 @@ const options = {
         get: {
           tags: ['Suppliers'],
           summary: 'Get supplier by id',
-          description:
-            'Retrieve one supplier by MongoDB ObjectId. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve one supplier by MongoDB ObjectId.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -185,7 +194,10 @@ const options = {
         put: {
           tags: ['Suppliers'],
           summary: 'Update supplier by id',
-          description: 'Update supplier fields. (Role: ADMIN)',
+          description: `Update supplier fields.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -241,7 +253,9 @@ const options = {
         delete: {
           tags: ['Suppliers'],
           summary: 'Delete supplier by id',
-          description: 'Delete a supplier. (Role: ADMIN)',
+          description: `Delete a supplier.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -293,8 +307,9 @@ const options = {
         get: {
           tags: ['Users'],
           summary: 'List all users',
-          description:
-            'ADMIN-only endpoint to retrieve all users, sorted by creation date descending.',
+          description: `ADMIN-only endpoint to retrieve all users, sorted by creation date descending.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -343,7 +358,10 @@ const options = {
         post: {
           tags: ['Products'],
           summary: 'Create product',
-          description: 'Create a product in the catalog. (Roles: ADMIN, WAREHOUSE)',
+          description: `Create a product in the catalog.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE`,
           security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
@@ -400,8 +418,11 @@ const options = {
         get: {
           tags: ['Products'],
           summary: 'List products',
-          description:
-            'Retrieve all products, sorted by creation date descending. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve all products, sorted by creation date descending.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -449,7 +470,11 @@ const options = {
         get: {
           tags: ['Products'],
           summary: 'Get product by id',
-          description: 'Retrieve one product by MongoDB ObjectId. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve one product by MongoDB ObjectId.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -507,7 +532,10 @@ const options = {
         put: {
           tags: ['Products'],
           summary: 'Update product by id',
-          description: 'Update product fields. (Roles: ADMIN, WAREHOUSE)',
+          description: `Update product fields.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -575,7 +603,9 @@ const options = {
         delete: {
           tags: ['Products'],
           summary: 'Delete product by id',
-          description: 'Delete a product. (Role: ADMIN)',
+          description: `Delete a product.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -625,8 +655,11 @@ const options = {
         get: {
           tags: ['Inventory'],
           summary: 'List all inventory logs',
-          description:
-            'Retrieve all inventory movement logs sorted by latest first. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve all inventory movement logs sorted by latest first.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           responses: {
             200: {
@@ -657,8 +690,11 @@ const options = {
         get: {
           tags: ['Inventory'],
           summary: 'List inventory logs by product',
-          description:
-            'Retrieve all inventory logs for a specific product sorted by latest first. (Roles: ADMIN, WAREHOUSE)',
+          description: `Retrieve all inventory logs for a specific product sorted by latest first.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -712,8 +748,11 @@ const options = {
         get: {
           tags: ['Inventory'],
           summary: 'Get current stock by product',
-          description:
-            'Calculate available stock from inventory IN/OUT movements for one product. (Roles: ADMIN, WAREHOUSE)',
+          description: `Calculate available stock from inventory IN/OUT movements for one product.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -765,8 +804,10 @@ const options = {
         post: {
           tags: ['Orders'],
           summary: 'Create order',
-          description:
-            'Create a new customer order with status PENDING and calculated totalAmount. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Create a new customer order with status PENDING and calculated totalAmount.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
@@ -821,7 +862,10 @@ const options = {
         get: {
           tags: ['Orders'],
           summary: 'List all orders',
-          description: 'Retrieve all orders sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Retrieve all orders sorted by latest first.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -870,7 +914,10 @@ const options = {
         get: {
           tags: ['Orders'],
           summary: 'Get order by id',
-          description: 'Retrieve one order by MongoDB ObjectId. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Retrieve one order by MongoDB ObjectId.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -935,8 +982,10 @@ const options = {
         put: {
           tags: ['Orders'],
           summary: 'Confirm order and decrement stock',
-          description:
-            'Confirms a PENDING order after stock check and creates OUT inventory logs for each item. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Confirms a PENDING order after stock check and creates OUT inventory logs for each item.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1011,8 +1060,10 @@ const options = {
         post: {
           tags: ['Purchases'],
           summary: 'Create purchase',
-          description:
-            'Create a supplier purchase with status PENDING and calculated totalAmount. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Create a supplier purchase with status PENDING and calculated totalAmount.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
@@ -1067,7 +1118,10 @@ const options = {
         get: {
           tags: ['Purchases'],
           summary: 'List all purchases',
-          description: 'Retrieve all purchases sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Retrieve all purchases sorted by latest first.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1116,8 +1170,10 @@ const options = {
         get: {
           tags: ['Purchases'],
           summary: 'Get purchases by supplier id',
-          description:
-            'Retrieve purchase history for a specific supplier sorted by latest first. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Retrieve purchase history for a specific supplier sorted by latest first.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1184,7 +1240,10 @@ const options = {
         get: {
           tags: ['Purchases'],
           summary: 'Get purchase by id',
-          description: 'Retrieve one purchase by MongoDB ObjectId. (Roles: ADMIN, ACCOUNTANT)',
+          description: `Retrieve one purchase by MongoDB ObjectId.
+Allowed Roles:
+- ADMIN
+- ACCOUNTANT`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1249,8 +1308,10 @@ const options = {
         put: {
           tags: ['Purchases'],
           summary: 'Update purchase status',
-          description:
-            'Update purchase status to PENDING or RECEIVED. When set to RECEIVED, IN inventory logs are created for each item. (Roles: ADMIN, WAREHOUSE)',
+          description: `Update purchase status to PENDING or RECEIVED. When set to RECEIVED, IN inventory logs are created for each item.
+Allowed Roles:
+- ADMIN
+- WAREHOUSE`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1329,8 +1390,9 @@ const options = {
         get: {
           tags: ['Dashboard'],
           summary: 'Get monthly purchase totals',
-          description:
-            'Returns purchase totals grouped by month for a given year (defaults to current UTC year). (Role: ADMIN)',
+          description: `Returns purchase totals grouped by month for a given year (defaults to current UTC year).
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1384,8 +1446,9 @@ const options = {
         get: {
           tags: ['Dashboard'],
           summary: 'Get monthly order totals',
-          description:
-            'Returns order totals grouped by month for a given year (defaults to current UTC year). (Role: ADMIN)',
+          description: `Returns order totals grouped by month for a given year (defaults to current UTC year).
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {
@@ -1439,8 +1502,9 @@ const options = {
         get: {
           tags: ['Dashboard'],
           summary: 'Get top sold products',
-          description:
-            'Returns top 5 sold products based on OUT inventory movements. (Role: ADMIN)',
+          description: `Returns top 5 sold products based on OUT inventory movements.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           responses: {
             200: {
@@ -1472,8 +1536,9 @@ const options = {
         get: {
           tags: ['Dashboard'],
           summary: 'Get low stock products',
-          description:
-            'Returns products with computed stock below 10 units based on IN/OUT inventory movements. (Role: ADMIN)',
+          description: `Returns products with computed stock below 10 units based on IN/OUT inventory movements.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           responses: {
             200: {
@@ -1505,8 +1570,9 @@ const options = {
         get: {
           tags: ['Dashboard'],
           summary: 'Get finance summary',
-          description:
-            'Returns yearly totals (revenue, spent, net profit) and monthly financial breakdown. (Role: ADMIN)',
+          description: `Returns yearly totals (revenue, spent, net profit) and monthly financial breakdown.
+Allowed Roles:
+- ADMIN`,
           security: [{ bearerAuth: [] }],
           parameters: [
             {

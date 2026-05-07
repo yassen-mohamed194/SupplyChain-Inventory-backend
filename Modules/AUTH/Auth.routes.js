@@ -72,7 +72,10 @@ const { login, getMe } = require('./Auth.controller');
  *   get:
  *     tags: [Auth]
  *     summary: Get profile of authenticated user
- *     description: Returns currently authenticated user profile extracted from JWT claims.
+ *     description: |
+ *       Returns currently authenticated user profile extracted from JWT claims.
+ *       Allowed Roles:
+ *       - Any authenticated user (no role restriction middleware)
  *     security:
  *       - bearerAuth: []
  *     responses:
