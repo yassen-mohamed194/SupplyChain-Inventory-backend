@@ -40,7 +40,7 @@ router.get(
 
 router.get(
   '/:id',
-  authorizeRoles('ADMIN', 'ACCOUNTANT'),
+  authorizeRoles('ADMIN', 'ACCOUNTANT','WAREHOUSE'),
   validate(purchaseIdSchema, 'params', idParamsOptions),
   getPurchaseById
 );
