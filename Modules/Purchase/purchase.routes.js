@@ -30,7 +30,7 @@ router.post(
   createPurchase
 );
 
-router.get('/', authorizeRoles('ADMIN', 'ACCOUNTANT'), getAllPurchases);
+router.get('/', authorizeRoles('ADMIN', 'ACCOUNTANT' , 'WAREHOUSE'), getAllPurchases);
 
 router.get(
   '/supplier/:supplierId',
